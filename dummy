@@ -1,0 +1,77 @@
+-- Users Table
+CREATE TABLE Users (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    role ENUM('SUPPLIER', 'CUSTOMER', 'ADMIN') NOT NULL
+);
+
+-- Suppliers Table
+CREATE TABLE Suppliers (
+    supplier_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    company_name VARCHAR(100),
+    contact_info TEXT,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+
+-- Medicines Table
+CREATE TABLE Medicines (
+    medicine_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    description TEXT
+);
+
+-- Supplier_Medicines Table (many-to-many relationship between Suppliers and Medicines)
+CREATE TABLE Supplier_Medicines (
+    supplier_medicine_id INT PRIMARY KEY AUTO_INCREMENT,
+    supplier_id INT NOT NULL,
+    medicine_id INT NOT NULL,
+    quantity INT NOT NULL,
+    FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id),
+    FOREIGN KEY (medicine_id) REFERENCES Medicines(medicine_id)
+);
+
+-- Customers Table
+CREATE TABLE Customers (
+    customer_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    contact_info TEXT,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+
+-- Requests Table
+CREATE TABLE Requests (
+    request_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    supplier_id INT NOT NULL,
+    medicine_id INT NOT NULL,
+    quantity INT NOT NULL,
+    request_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING',
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id),
+    FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id),
+    FOREIGN KEY (medicine_id) REFERENCES Medicines(medicine_id)
+);
+
+-- Request_Items Table (Items in each request)
+CREATE TABLE Request_Items (
+    request_item_id INT PRIMARY KEY AUTO_INCREMENT,
+    request_id INT NOT NULL,
+    medicine_id INT NOT NULL,
+    quantity INT NOT NULL,
+    FOREIGN KEY (request_id) REFERENCES Requests(request_id),
+    FOREIGN KEY (medicine_id) REFERENCES Medicines(medicine_id)
+);
+
+-- Transactions Table
+CREATE TABLE Transactions (
+    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    supplier_id INT NOT NULL,
+    customer_id INT NOT NULL,
+    request_id INT NOT NULL,
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id),
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id),
+    FOREIGN KEY (request_id) REFERENCES Requests(request_id)
+);

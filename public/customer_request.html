@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Request Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        .details {
+            margin-bottom: 20px;
+        }
+
+        .details table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .details th,
+        .details td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .button-group {
+            text-align: center;
+        }
+
+        .button-group button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .approve {
+            background-color: #28a745;
+        }
+
+        .reject {
+            background-color: #dc3545;
+        }
+
+        .approved {
+            color: green;
+        }
+
+        .rejected {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Customer Request Details</h1>
+        <div class="details" id="requestDetails">
+            <!-- Request details table will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        const supplierId = new URLSearchParams(window.location.search).get('supplier_id');
+        let i = 1;
+        // Fetch and display request details
+        fetch(`/get_requests?supplier_id=${supplierId}`)
+            .then(response => response.json())
+            .then(requests => {
+                const requestDetails = document.getElementById('requestDetails');
+
+                if (requests.length > 0) {
+                    // Constructing the table headers
+                    let tableHtml = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>s.no</th>
+                                    <th>Customer Name</th>
+                                    <th>Contact Info</th>
+                                    <th>Medicine Name</th>
+                                    <th>Quantity</th>
+                                    <th>Request Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    console.log(requests)
+                    // Populating table rows with request details
+                    requests.forEach(request => {
+                        tableHtml += `
+                            <tr>
+                                <td>${i++}</td>
+                                <td>${request.customer_name}</td>
+                                <td>${request.contact_info}</td>
+                                <td>${request.medicine_name}</td>
+                                <td>${request.quantity}</td>
+                                <td>${new Date(request.request_date).toLocaleString()}</td>
+                                <td>
+                                    <button class="approve" onclick="updateRequestStatus(${request.request_id}, 'APPROVED')">Approve</button>
+                                    <button class="reject" onclick="updateRequestStatus(${request.request_id}, 'REJECTED')">Reject</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    tableHtml += `
+                        </tbody>
+                    </table>
+                    `;
+
+                    requestDetails.innerHTML = tableHtml;
+                } else {
+                    requestDetails.innerHTML = 'No requests found for this supplier.';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching request details:', error);
+                requestDetails.innerHTML = 'Error fetching request details.';
+            });
+
+        // Update request status
+        function updateRequestStatus(requestId, status) {
+            console.log("it's working")
+            fetch('/update_request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ request_id: requestId, status: status })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    } else {
+                        return response.text();
+                    }
+                })
+                .then(message => {
+                    console.log(message);
+                    alert(`Request ${requestId} ${status === 'APPROVED' ? 'Approved' : 'Rejected'}`);
+                    window.location.reload(); // Refresh the page after update
+                })
+                .catch(error => {
+                    console.error('Error updating request status:', error);
+                    console.log('Failed to update request status.');
+                });
+        }
+    </script>
+</body>
+
+</html>

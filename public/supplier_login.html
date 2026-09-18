@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login and Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 45px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .container h2 {
+            margin: 0 0 20px;
+            color: #333;
+        }
+
+        .container form {
+            display: none;
+        }
+
+        .container form.active {
+            display: block;
+        }
+
+        .container input[type="text"],
+        .container input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .container input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .container input[type="submit"]:hover {
+            background-color: #555;
+        }
+
+        .container button {
+            background: none;
+            border: none;
+            color: #333;
+            cursor: pointer;
+            margin-top: 10px;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <form id="loginForm" action="/login" method="post" class="active">
+            <h2>Login</h2>
+            <label for="Username"></label>
+            <input type="text" placeholder="Username" name="username" required>
+            <label for="Password"></label>
+            <input type="password" placeholder="Password" name="password" required>
+            <button type="submit">Login</button>
+        </form>
+
+        <form id="registerForm" action="/supplier_register" method="post">
+            <h2>Register</h2>
+            <label for="Username"></label>
+            <input type="text" placeholder="Username" name="username" required>
+            <label for="company_name"></label>
+            <input type="text" placeholder="company" name="company_name" required>
+            <label for="contact_info"></label>
+            <input type="text" placeholder="Contact" name="contact_info" required>
+            <label for="Password"></label>
+            <input type="password" placeholder="Password" name="password" required>
+            <label for="confirm_password"></label>
+            <input type="password" placeholder="Confirm Password" name="confirm_password" required>
+            <button type="submit">Register</button>
+        </form>
+
+
+
+        <button id="switchToRegister">Don't have an account? Register here</button>
+        <button id="switchToLogin" style="display: none;">Already have an account? Login here</button>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const switchToRegister = document.getElementById('switchToRegister');
+        const switchToLogin = document.getElementById('switchToLogin');
+
+        switchToRegister.addEventListener('click', () => {
+            loginForm.classList.remove('active');
+            registerForm.classList.add('active');
+            switchToRegister.style.display = 'none';
+            switchToLogin.style.display = 'inline';
+        });
+
+        switchToLogin.addEventListener('click', () => {
+            registerForm.classList.remove('active');
+            loginForm.classList.add('active');
+            switchToLogin.style.display = 'none';
+            switchToRegister.style.display = 'inline';
+        });
+    </script>
+</body>
+
+</html>

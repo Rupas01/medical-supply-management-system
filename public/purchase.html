@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Medicines</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+        .supplier-list, .medicine-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .supplier-item, .medicine-item {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .supplier-item:hover, .medicine-item:hover {
+            background-color: #f0f0f0;
+        }
+        .hidden {
+            display: none;
+        }
+        input[type="number"] {
+            width: 50px;
+        }
+        input[type="submit"] {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto 0;
+        }
+        input[type="submit"]:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Purchase Medicines</h1>
+        <ul id="supplierList" class="supplier-list"></ul>
+        <ul id="medicineList" class="medicine-list hidden"></ul>
+        <form id="purchaseForm" class="hidden">
+            <input type="submit" value="Submit Purchase">
+        </form>
+    </div>
+
+    <script>
+        // Fetch and display suppliers
+        fetch('/get_suppliers')
+            .then(response => response.json())
+            .then(suppliers => {
+                const supplierList = document.getElementById('supplierList');
+                suppliers.forEach(supplier => {
+                    const li = document.createElement('li');
+                    li.textContent = supplier.company_name;
+                    li.className = 'supplier-item';
+                    li.dataset.supplierId = supplier.supplier_id;
+                    supplierList.appendChild(li);
+                });
+            });
+
+        document.getElementById('supplierList').addEventListener('click', (e) => {
+            if (e.target.classList.contains('supplier-item')) {
+                const supplierId = e.target.dataset.supplierId;
+
+                // Fetch and display medicines for the selected supplier
+                fetch(`/get_medicines?supplier_id=${supplierId}`)
+                    .then(response => response.json())
+                    .then(medicines => {
+                        const medicineList = document.getElementById('medicineList');
+                        medicineList.innerHTML = ''; // Clear previous medicines
+                        medicines.forEach(medicine => {
+                            const li = document.createElement('li');
+                            li.className = 'medicine-item';
+                            li.innerHTML = `
+                                <label>
+                                    <input type="checkbox" name="medicines" value="${medicine.medicine_id}">
+                                    ${medicine.name} - ${medicine.description}
+                                    <input type="number" name="quantity_${medicine.medicine_id}" min="1" value="1">
+                                </label>
+                            `;
+                            medicineList.appendChild(li);
+                        });
+
+                        document.getElementById('medicineList').classList.remove('hidden');
+                        document.getElementById('purchaseForm').classList.remove('hidden');
+                    });
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('purchaseForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const selectedMedicines = Array.from(document.querySelectorAll('input[name="medicines"]:checked')).map(medicineCheckbox => {
+                const medicineId = medicineCheckbox.value;
+                const quantity = document.querySelector(`input[name="quantity_${medicineId}"]`).value;
+                return { medicine_id: medicineId, quantity: quantity };
+            });
+
+            fetch('/submit_purchase', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ medicines: selectedMedicines })
+            })
+            .then(response => response.text())
+            .then(message => {
+                alert(message);
+                document.getElementById('medicineList').classList.add('hidden');
+                document.getElementById('purchaseForm').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>

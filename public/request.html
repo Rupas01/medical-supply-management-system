@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Requests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .status-pending {
+            color: orange;
+        }
+        .status-approved {
+            color: green;
+        }
+        .status-rejected {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Purchase Requests</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Medicine Name</th>
+                    <th>Quantity</th>
+                    <th>Status</th>
+                    <th>Request Date</th>
+                </tr>
+            </thead>
+            <tbody id="requestTableBody">
+                <!-- Rows will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Fetch and display purchase requests for the logged-in customer
+        fetch('/get_status')
+            .then(response => response.json())
+            .then(requests => {
+                const requestTableBody = document.getElementById('requestTableBody');
+                console.log(requests)
+                requests.forEach(request => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${request.medicine_name}</td>
+                        <td>${request.quantity}</td>
+                        <td class="status-${request.status.toLowerCase()}">${request.status}</td>
+                        <td>${new Date(request.request_date).toLocaleString()}</td>
+                    `;
+                    requestTableBody.appendChild(tr);
+                });
+            });
+    </script>
+</body>
+</html>
